@@ -67,9 +67,9 @@ def main():
     print("Entraînement du modèle YOLO...")
     model = None                # Clear previous model from memory
     model = YOLO(MODEL_NAME).to('cuda')  # Utilisez un modèle YOLO pré-entraîné 
-    model.train(data=DATA_YAML, epochs=1, 
+    model.train(data=DATA_YAML, time=1.7, 
                 imgsz=640, batch=16,
-                name=PROJ_NAME, device='auto',
+                name=PROJ_NAME,
                 dropout= DROPOUT_PROB, perspective=PERSPECTIVE_PROB)
 
     print("Pipeline terminé avec succès !")

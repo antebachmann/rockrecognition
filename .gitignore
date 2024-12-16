@@ -4,4 +4,4 @@ swissSURFACE3D_patches/
 runs/detect/
 src/__pycache__
 datasets/
-yolo11x.pt
+*.pt

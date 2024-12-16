@@ -1,0 +1,6 @@
+swissImage_50cm_patches/
+swissSURFACE3D_hillshade_patches/
+swissSURFACE3D_patches/
+runs/detect/
+src/__pycache__
+datasets/

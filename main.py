@@ -1,28 +1,40 @@
 import os
 import json
 import sys
-import os
-from src import prepare_yolo_annotations, copy_files
+from src import prepare_yolo_annotations, copy_files, create_yaml_file
 from ultralytics import YOLO
 from sklearn.model_selection import train_test_split
+from pathlib import Path
+import torch
+import matplotlib.pyplot as plt
+from PIL import Image
 
 # Chemins des fichiers et répertoires
-json_file_path = "C:/Users/asus/Desktop/Rocks detection project/LargeRocksDetectionDataset/LargeRocksDetectionDataset/large_rock_dataset.json"
-OUTPUT_DIR = "C:/Users/asus/Desktop/rockrecognition/output"
+json_file_path = "large_rock_dataset.json"
+OUTPUT_DIR = "datasets"
 TRAIN_DIR = os.path.join(OUTPUT_DIR, "train")
+if not(os.path.isfile('data.yaml')): create_yaml_file(OUTPUT_DIR) # Creates YAML file if it does not exist
 VAL_DIR = os.path.join(OUTPUT_DIR, "val")
-DATA_YAML = "C:/Users/asus/Desktop/rockrecognition/models/first_try_model.yaml"  # Chemin vers votre fichier YAML existant
-IMAGE_DIR = "C:/Users/asus/Desktop/Rocks detection project/LargeRocksDetectionDataset/LargeRocksDetectionDataset/swissImage_50cm_patches/"
+DATA_YAML = str(Path('data.yaml').resolve())  # Chemin absolu vers votre fichier YAML existant
+IMAGE_DIR = "swissImage_50cm_patches/"
+
+
+# Model settings
+DROPOUT_PROB = 0.05
+PERSPECTIVE_PROB = 0.001
+MODEL_NAME = 'yolo11s.pt'
+PROJ_NAME = f"rock_detection_dp-{DROPOUT_PROB}_pp-{PERSPECTIVE_PROB}_{MODEL_NAME.replace('.pt','')}"
+MODEL_OUTPUT = 'runs/detect/' + PROJ_NAME
 
 def main():
     # 1. Charger les données JSON
     print("Chargement des données JSON...")
     with open(json_file_path, 'r') as file:
         data = json.load(file)
-        dataset =data['dataset']
+        dataset = data['dataset']
     print('Number of samples  :', len(dataset) )
     print(f"{len(dataset)} images trouvées dans le dataset.")
-
+    
 
     # 2. Préparer les annotations au format YOLO
     print("Conversion des annotations en format YOLO...")
@@ -49,14 +61,21 @@ def main():
         dest_img=f"{OUTPUT_DIR}/val/images",
         dest_ann=f"{OUTPUT_DIR}/val/labels",
     )
-
+    
      
     # 4. Entraîner YOLO
     print("Entraînement du modèle YOLO...")
-    model = YOLO("yolov8n.pt")  # Utilisez un modèle YOLO pré-entraîné 
-    model.train(data=DATA_YAML, epochs=50, imgsz=640, batch=16, name="rock_detection")
+    model = None                # Clear previous model from memory
+    model = YOLO(MODEL_NAME).to('cuda')  # Utilisez un modèle YOLO pré-entraîné 
+    model.train(data=DATA_YAML, epochs=1, 
+                imgsz=640, batch=16,
+                name=PROJ_NAME, device='auto',
+                dropout= DROPOUT_PROB, perspective=PERSPECTIVE_PROB)
 
     print("Pipeline terminé avec succès !")
+    torch.cuda.empty_cache()    # Clear GPU memory once finished
+    plt.imshow(Image.open(MODEL_OUTPUT+'/results.png'))
+    plt.show()
 
 if __name__ == "__main__":
     main()

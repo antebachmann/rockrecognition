@@ -3,6 +3,7 @@ import shutil
 from PIL import Image
 import numpy as np
 from tifffile import tifffile as tiff
+import yaml
 
 
 def prepare_yolo_annotations(dataset, output_dir):
@@ -26,6 +27,17 @@ def prepare_yolo_annotations(dataset, output_dir):
                 width_rel = 10 / 640
                 height_rel = 10 / 640
                 f.write(f"0 {x_rel} {y_rel} {width_rel} {height_rel}\n")
+
+def create_yaml_file(output_dir):
+    data = {'train': f'{output_dir}/train/images',
+            'val' : f'{output_dir}/train/images',
+            'nc': 1,           # Number of classes
+            'names': ['rock']} # Name of classes
+    with open('data.yaml', 'w') as f:
+        yaml.dump(data,f, sort_keys=False)
+
+    return
+    
 
 
 

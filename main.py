@@ -6,8 +6,10 @@ from ultralytics import YOLO
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 import torch
+from torch import nn
 import matplotlib.pyplot as plt
 from PIL import Image
+
 
 # Chemins des fichiers et répertoires
 json_file_path = "large_rock_dataset.json"
@@ -15,8 +17,8 @@ OUTPUT_DIR = "datasets"
 TRAIN_DIR = os.path.join(OUTPUT_DIR, "train")
 if not(os.path.isfile('data.yaml')): create_yaml_file(OUTPUT_DIR) # Creates YAML file if it does not exist
 VAL_DIR = os.path.join(OUTPUT_DIR, "val")
-DATA_YAML = str(Path('data.yaml').resolve())  # Chemin absolu vers votre fichier YAML existant
-IMAGE_DIR = "swissImage_50cm_patches/"
+DATA_YAML = str(Path('data.yaml').resolve())  # Absolute path for the YAML file
+IMAGE_DIR = "combined_images/"
 
 
 # Model settings
@@ -63,20 +65,20 @@ def main():
     )
     
      
-    # 4. Entraîner YOLO
+    # 4. Train YOLO model
     print("Entraînement du modèle YOLO...")
     model = None                # Clear previous model from memory
-    model = YOLO(MODEL_NAME).to('cuda')  # Utilisez un modèle YOLO pré-entraîné 
-    model.train(data=DATA_YAML, time=1.7, 
+    model = YOLO(MODEL_NAME).to('cuda')  # Use a pretrained YOLO model
+    model.train(data=DATA_YAML, epochs=25, 
                 imgsz=640, batch=16,
                 name=PROJ_NAME,
                 dropout= DROPOUT_PROB, perspective=PERSPECTIVE_PROB)
 
-    print("Pipeline terminé avec succès !")
+    print("Pipeline ended successfully !")
     torch.cuda.empty_cache()    # Clear GPU memory once finished
     plt.imshow(Image.open(MODEL_OUTPUT+'/results.png'))
     plt.show()
 
 if __name__ == "__main__":
     main()
-
+    sys.exit()

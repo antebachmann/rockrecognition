@@ -5,12 +5,12 @@ from src import early_fusion
 
 # Chemins des dossiers source
 
-src_SI = "C:/Users/asus/Desktop/Rocks detection project/LargeRocksDetectionDataset/LargeRocksDetectionDataset/swissImage_50cm_patches/"
-src_SS = "C:/Users/asus/Desktop/Rocks detection project/LargeRocksDetectionDataset/LargeRocksDetectionDataset/swissSURFACE3D_patches/"
-src_HS = "C:/Users/asus/Desktop/Rocks detection project/LargeRocksDetectionDataset/LargeRocksDetectionDataset/swissSURFACE3D_hillshade_patches/"
+src_SI = "swissImage_50cm_patches/"
+src_SS = "swissSURFACE3D_patches/"
+src_HS = "swissSURFACE3D_hillshade_patches/"
 
 # Dossier de sortie pour les images combinées
-output_dir = "C:/Users/asus/Desktop/rockrecognition/combined_images"
+output_dir = "combined_images"
 os.makedirs(output_dir, exist_ok=True)
 
 # Parcourir les fichiers et réaliser l'early fusion
@@ -27,10 +27,8 @@ for file_name in file_names:
         print(f"Erreur pour {file_name}: {e}")
 
 
-import tifffile as tiff
-
 # Charger une image fusionnée
-fused_image = tiff.imread('C:/Users/asus/Desktop/rockrecognition/combined_images/2781_1141_3_3.tif')
+fused_image = tiff.imread('combined_images/2781_1141_3_3.tif')
 print("Dimensions de l'image fusionnée :", fused_image.shape)  # (hauteur, largeur, 5)
 
 # Afficher les différents canaux

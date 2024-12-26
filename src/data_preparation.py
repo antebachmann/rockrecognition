@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 from tifffile import tifffile as tiff
 import yaml
-
+import cv2
 
 def prepare_yolo_annotations(dataset, output_dir):
     """
@@ -56,21 +56,52 @@ def normalize(img):
 
 
 def early_fusion(si_path, ss_path, hs_path, output_path):
+    """
+    This function performs early fusion of 3 different types of images,
+    RGB, Surface3D and Hillshade, each respectively merged into the RGB
+    channels of a combined image. The RGB image is first turned into a gray 
+    8 bit image.
+
+    Parameters
+    ----------
+    si_path : Path of RGB images of dataset
+    
+    ss_path : Path of Surface 3D images of dataset
+    
+    hs_path : Path of Hillshade images of dataset
+    
+    output_path : Path of output directory
+    
+
+    Raises
+    ------
+    ValueError
+        Checks if image dimensions are consistent.
+
+    Returns
+    -------
+    None.
+
+    """
     si_img = tiff.imread(si_path)  # Image RGB (3 canaux)
     ss_img = tiff.imread(ss_path)  # Image Surface 3D (1 canal)
     hs_img = tiff.imread(hs_path)  # Image Hillshade (1 canal)
+    fused_image = si_img.copy()
+    
+    si_img = cv2.cvtColor(si_img, cv2.COLOR_RGB2GRAY)
 
     si_img = normalize(si_img)
     ss_img = normalize(ss_img)
     hs_img = normalize(hs_img)
 
     if si_img.shape[:2] != ss_img.shape[:2] or si_img.shape[:2] != hs_img.shape[:2]:
-        raise ValueError(f"Les dimensions ne correspondent pas pour {si_path}")
+        raise ValueError(f"Dimensions don't correspond for {si_path}")
+        
+    
+    fused_image[:, :, 0] = ss_img
+    fused_image[:, :, 1] = si_img
+    fused_image[:, :, 2] = hs_img
 
-    ss_img = np.expand_dims(ss_img, axis=2)  
-    hs_img = np.expand_dims(hs_img, axis=2)
-    fused_image = np.dstack((si_img, ss_img, hs_img))  
-
-    tiff.imwrite(output_path, fused_image)
-    print(f"saved fusion for an img: {output_path}")
+    tiff.imwrite(output_path, fused_image, photometric='rgb')
+    print(f"Saved fusion for an img: {output_path}")
 

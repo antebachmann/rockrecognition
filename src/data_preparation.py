@@ -25,8 +25,8 @@ def prepare_yolo_annotations(dataset, output_dir):
         with open(output_path, 'w') as f:
             for box in bboxes:
                 x_rel, y_rel = box['relative_within_patch_location']
-                width_rel = 10 / 640
-                height_rel = 10 / 640
+                width_rel = 30 / 640
+                height_rel = 30 / 640
                 f.write(f"0 {x_rel} {y_rel} {width_rel} {height_rel}\n")
 
 def create_yaml_file(output_dir):

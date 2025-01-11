@@ -5,6 +5,7 @@ import numpy as np
 from tifffile import tifffile as tiff
 import yaml
 import cv2
+import re
 
 def prepare_yolo_annotations(dataset, output_dir):
     """
@@ -55,7 +56,7 @@ def normalize(img):
     return img
 
 
-def early_fusion(si_path, ss_path, hs_path, output_path):
+def early_fusion(si_path, ss_path, hs_path, output_path, fusion_settings):
     """
     This function performs early fusion of 3 different types of images,
     RGB, Surface3D and Hillshade, each respectively merged into the RGB
@@ -83,12 +84,28 @@ def early_fusion(si_path, ss_path, hs_path, output_path):
     None.
 
     """
+    
+    option_list = ['RGB', '3D', 'HS', 'R', 'G', 'B']
+    
+    
+    fusion_settings = re.split('\s', fusion_settings)
+    
+    for setting in fusion_settings:
+        if setting not in option_list:
+            raise Exception('Setting not available or incorrectly formatted.')
+            exit()
+    if len(fusion_settings) == 1:
+        if fusion_settings == ['RGB']:
+            fusion_settings = ['R', 'G', 'B']
+        else:
+            fusion_settings *= 3
+    
     si_img = tiff.imread(si_path)  # Image RGB (3 canaux)
     ss_img = tiff.imread(ss_path)  # Image Surface 3D (1 canal)
     hs_img = tiff.imread(hs_path)  # Image Hillshade (1 canal)
     fused_image = si_img.copy()
     
-    si_img = cv2.cvtColor(si_img, cv2.COLOR_RGB2GRAY)
+    #si_img = cv2.cvtColor(si_img, cv2.COLOR_RGB2GRAY)
 
     si_img = normalize(si_img)
     ss_img = normalize(ss_img)
@@ -97,10 +114,21 @@ def early_fusion(si_path, ss_path, hs_path, output_path):
     if si_img.shape[:2] != ss_img.shape[:2] or si_img.shape[:2] != hs_img.shape[:2]:
         raise ValueError(f"Dimensions don't correspond for {si_path}")
         
-    
-    fused_image[:, :, 0] = ss_img
-    fused_image[:, :, 1] = si_img
-    fused_image[:, :, 2] = hs_img
+    for i, setting in enumerate(fusion_settings):
+         if (setting == 'RGB'):
+             img = cv2.cvtColor(si_img, cv2.COLOR_RGB2GRAY)
+         elif (setting == 'R'):
+             img = si_img[:,:, 0]
+         elif (setting == 'G'):
+             img = si_img[:,:, 1]
+         elif (setting == 'B'):
+             img = si_img[:,:, 2]
+         elif (setting == '3D'):
+             img = ss_img
+         elif (setting == 'HS'):
+             img = hs_img
+         fused_image[:,:,i] = img
+             
 
     tiff.imwrite(output_path, fused_image, photometric='rgb')
     print(f"Saved fusion for an img: {output_path}")

@@ -18,7 +18,7 @@ TRAIN_DIR = os.path.join(OUTPUT_DIR, "train")
 if not(os.path.isfile('data.yaml')): create_yaml_file(OUTPUT_DIR) # Creates YAML file if it does not exist
 VAL_DIR = os.path.join(OUTPUT_DIR, "val")
 DATA_YAML = str(Path('data.yaml').resolve())  # Absolute path for the YAML file
-IMAGE_DIR = "combined_images/"
+IMAGE_DIR = "RGB images/"
 
 
 # Model settings
@@ -69,7 +69,7 @@ def main():
     print("Entraînement du modèle YOLO...")
     model = None                # Clear previous model from memory
     model = YOLO(MODEL_NAME).to('cuda')  # Use a pretrained YOLO model
-    model.train(data=DATA_YAML, epochs=25, 
+    model.train(data=DATA_YAML, epochs=1, 
                 imgsz=640, batch=16,
                 name=PROJ_NAME,
                 dropout= DROPOUT_PROB, perspective=PERSPECTIVE_PROB)

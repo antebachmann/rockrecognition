@@ -6,3 +6,6 @@ runs/detect/
 src/__pycache__
 datasets/
 *.pt
+models/
+* images/
+src/pca.py

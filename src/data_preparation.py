@@ -108,6 +108,7 @@ def early_fusion(si_path, ss_path, hs_path, output_path, fusion_settings):
     #si_img = cv2.cvtColor(si_img, cv2.COLOR_RGB2GRAY)
 
     si_img = normalize(si_img)
+    ss_img = np.log1p(ss_img)   # Apply logarithmic scale to surface 3D images
     ss_img = normalize(ss_img)
     hs_img = normalize(hs_img)
 
